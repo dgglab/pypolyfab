@@ -1,2 +1,2 @@
 # pypolyfab
-Progromatically generate designs for two-dimensional devices
+Programatically generate designs for two-dimensional devices
