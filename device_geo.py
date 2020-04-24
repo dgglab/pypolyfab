@@ -1,5 +1,8 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import numpy as np
+from shapely.geometry import Polygon
+from shapely.geometry.polygon import orient
+import shapely.affinity as affine
 
 class Device:
     def __init__(self):
@@ -24,70 +27,70 @@ class Device:
             feature.rotate_and_offset(delx, dely, theta)
 
 
-    def join_features(self):
+    #def join_features(self):
 
-    def plot():
+    #def plot():
 
-    def DXF_output():
+    #def DXF_output():
 
-    def grow():
+    #def grow():
 
 
 
 class Feature:
-    def __init__(self, p, layer):
-        self.update_shape(p)
-        self.init_Tmatrix()
+    def __init__(self, ps, layer):
+        """
+        Generates a shapely polygon for a given feature
+
+        ps: list of tuples of points for polygon
+        layer: layer the polygon will live in in cad
+        """
+        self.update_shape(ps)
         self.set_layer(layer)
-
-
-    def init_Tmatrix():
-        self.Tmatrix = np.matlib.eye(3)
 
 
     def set_layer(self, layer):
         self.layer = layer
 
 
-    def update_shape(self, p):
-    """
-    update coordinates to be clockwise
-    """
-        if p[0] == p[-1]:
-            self.p_base = p
-        else:
-            p.append(p[0])
-            self.p_base = p
-
+    def update_shape(self, ps):
+        """
+        updates the coordinates of the polygon and sets to be clockwise
+        """
+        self.poly = Polygon(ps)
         self.poly2cw()
-        self.perform_transformation()
 
 
     def poly2cw(self):
         '''
-        Checks the orienation of the polygon. If its verticies are oriented
-        ccw, the following sum will be negative. The verticies are then
-        reversed to be cw.
+        Forces verticies of polygon to be clockwise
         '''
-        orientation = 0
-
-        for i, (px,py) in enumerate(self.p_base):
-            px2 = self.p_base[i+1][0]
-            py2 = self.p_base[i+1][1]
-            orientation += (px2 - px) * (py2 + py)
-
-        if orientation < 0:
-            self.p_base = self.p_base[::-1]
+        self.poly =  orient(self.poly,-1)
 
 
-    def perform_transformation(self):
-        self.p = []
-        for px, py in self.p_base:
-            self.p.append(
-                self.Tmatrix[0,0]*px + self.Tmatrix[0,1]*py + self.Tmatrix[0,2],
-                self.Tmatrix[1,0]*px + self.Tmatrix[1,1]*py + self.Tmatrix[1,2]
-            )
+    def rotate_and_offset(self, delx, dely, theta, origin='center'):
+        '''
+        Rotate and translate the polygon
+        Rotate can take either center or centroid
+        '''
+        self.poly = affine.rotate(self.poly, theta, origin)
+        self.poly = affine.translate(self.poly, delx, dely)
 
-    def rotate_and_offset():
 
-    def grow():
+
+    def scale(self, xfact, yfact, origin='center'):
+        '''
+        Scale the feature by xfact and yfact
+        Scale can take either center or centroid
+        '''
+        self.poly = affine.scale(self.poly, xfact, yfact, 1, origin)
+
+    def gen_fig(self):
+        '''
+        Return a figure of the feature
+        '''
+        x = [x[0] for x in list(self.poly.exterior.coords)]
+        y = [x[1] for x in list(self.poly.exterior.coords)]
+        fig = plt.figure()
+        plt.plot(x, y)
+        return fig

@@ -20,8 +20,8 @@ class Bar(Device):
              ( W/2.0, -L/2.0),
              (-W/2.0, -L/2.0)]
 
-        body0 = Feature(p, 0);
-        self.register_feature(body0, 0, 0, 0);
+        body0 = Feature(p, 0)
+        self.register_feature(body0, 0, 0, 0)
 
 
     def add_ohmics(self):
