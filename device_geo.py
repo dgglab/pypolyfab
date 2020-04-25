@@ -3,54 +3,66 @@ import numpy as np
 from shapely.geometry import Polygon
 from shapely.geometry.polygon import orient
 import shapely.affinity as affine
+import copy
 
 class Device:
     def __init__(self):
-        self.features = []
+        self.features = {}
+        self.device = {}
 
-    def register_feature(self, feature, delx, dely, theta):
-        """
-        Register a feature to the device. Allows one to shift the position of
-        the feature in the coordinates of the device
-        """
-        feature.rotate_and_offset(delx,dely,theta)
-        self.features.append(feature)
-
-
-    def register_feature_group(self, feature_group, delx, dely, theta):
-        for feature in feature_group.features:
-            self.register_feature(feature, delx, dely, theta)
+    def register_feature(self, feature, layer):
+        '''
+        Register a feature to the device to the given layer
+        '''
+        if layer in self.features:
+            self.features[layer].append(feature)
+        else:
+            self.features[layer] = [feature]
 
 
-    def rotate_and_offset_device(self, delx, dely, theta):
-        for feature in self.features:
-            feature.rotate_and_offset(delx, dely, theta)
+    def heal(self):
+        '''
+        heals all the polygons together in a given device layer
+        '''
+        for layer in self.features.keys():
+            self.device[layer] = copy.copy(self.features[layer][0])
+            for feature in self.features[layer]:
+                self.device[layer].poly = self.device[layer].poly.union(feature.poly)
+            
+
+    def scale(self, layer, xfact, yfact, origin='center'):
+        '''
+        Scales each feature in the given layer by xfact and yfact
+        Scale can take either center or centroid
+        '''
+        self.device[layer].scale(xfact, yfact, origin)
 
 
-    #def join_features(self):
+    def gen_fig(self, layers):
+        '''
+        Return a figure of the feature
+        '''
+        fig = plt.figure()
+        for layer in self.device.keys():
 
-    #def plot():
+            x = [x[0] for x in list(self.poly.exterior.coords)]
+            y = [x[1] for x in list(self.poly.exterior.coords)]
+
+        plt.plot(x, y)
+        return fig
+
 
     #def DXF_output():
 
-    #def grow():
-
-
 
 class Feature:
-    def __init__(self, ps, layer):
+    def __init__(self, ps):
         """
         Generates a shapely polygon for a given feature
 
         ps: list of tuples of points for polygon
-        layer: layer the polygon will live in in cad
         """
         self.update_shape(ps)
-        self.set_layer(layer)
-
-
-    def set_layer(self, layer):
-        self.layer = layer
 
 
     def update_shape(self, ps):
@@ -77,13 +89,13 @@ class Feature:
         self.poly = affine.translate(self.poly, delx, dely)
 
 
-
     def scale(self, xfact, yfact, origin='center'):
         '''
         Scale the feature by xfact and yfact
         Scale can take either center or centroid
         '''
         self.poly = affine.scale(self.poly, xfact, yfact, 1, origin)
+
 
     def gen_fig(self):
         '''
