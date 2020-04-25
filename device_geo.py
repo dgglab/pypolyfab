@@ -38,17 +38,22 @@ class Device:
         self.device[layer].scale(xfact, yfact, origin)
 
 
-    def gen_fig(self, layers):
+    def gen_fig(self):
         '''
-        Return a figure of the feature
+        Return a figure of the feature colored by layer
         '''
         fig = plt.figure()
         for layer in self.device.keys():
-
-            x = [x[0] for x in list(self.poly.exterior.coords)]
-            y = [x[1] for x in list(self.poly.exterior.coords)]
-
-        plt.plot(x, y)
+            if type(self.device[layer].poly) == Polygon:
+                x = [x[0] for x in list(self.device[layer].poly.exterior.coords)]
+                y = [x[1] for x in list(self.device[layer].poly.exterior.coords)]
+                plt.plot(x, y, color='C'+str(layer))
+            else:
+                for poly in self.device[layer].poly:
+                    x = [x[0] for x in list(poly.exterior.coords)]
+                    y = [x[1] for x in list(poly.exterior.coords)]
+                    plt.plot(x, y, color='C'+str(layer))
+        
         return fig
 
 
