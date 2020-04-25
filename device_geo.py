@@ -4,6 +4,7 @@ from shapely.geometry import Polygon
 from shapely.geometry.polygon import orient
 import shapely.affinity as affine
 import copy
+import ezdxf
 
 class Device:
     def __init__(self):
@@ -57,7 +58,26 @@ class Device:
         return fig
 
 
-    #def DXF_output():
+    def write_dxf(self, fname='output.dxf'):
+        '''
+        Return a dxf file. Writes layers to layers
+        '''
+        doc = ezdxf.new(dxfversion='R2010', setup=True)
+        msp = doc.modelspace()
+
+        for layer in self.device.keys():
+            if layer != 0:
+                doc.layers.new(name=str(layer), dxfattribs={'color': layer}) 
+
+            if type(self.device[layer].poly) == Polygon:
+                msp.add_lwpolyline(list(self.device[layer].poly.exterior.coords), 
+                                   dxfattribs={'layer': str(layer)})
+            else:
+                for poly in self.device[layer].poly:
+                    msp.add_lwpolyline(list(poly.exterior.coords), 
+                                       dxfattribs={'layer': str(layer)})
+
+        doc.saveas(fname)
 
 
 class Feature:
