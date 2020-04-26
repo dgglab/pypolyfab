@@ -15,8 +15,6 @@ class Device:
     def __init__(self):
         self.features = {}
 
-        self.device = {}
-
     def register_feature(self, feature, layer):
         '''
         Register a feature to the device to the given layer
@@ -31,35 +29,38 @@ class Device:
         heals all the polygons together in a given device layer
         '''
         for layer in self.features.keys():
-            self.device[layer] = copy.copy(self.features[layer][0])
-            for feature in self.features[layer]:
-                self.device[layer].poly = self.device[layer].poly.union(
-                    feature.poly)
+            healed = copy.copy(self.features[layer][0])
+            for i, feature in enumerate(self.features[layer]):
+                if i != 0:
+                    healed.poly = healed.poly.union(feature.poly)
+
+            self.features[layer] = [healed]
 
     def scale(self, layer, xfact, yfact, origin='center'):
         '''
         Scales each feature in the given layer by xfact and yfact
         Scale can take either center or centroid
         '''
-        self.device[layer].scale(xfact, yfact, origin)
+        self.features[layer].scale(xfact, yfact, origin)
 
     def gen_fig(self):
         '''
         Return a figure of the feature colored by layer
         '''
         fig = plt.figure()
-        for layer in self.device.keys():
-            if type(self.device[layer].poly) == Polygon:
-                x = [x[0]
-                     for x in list(self.device[layer].poly.exterior.coords)]
-                y = [x[1]
-                     for x in list(self.device[layer].poly.exterior.coords)]
-                plt.plot(x, y, color='C'+str(layer))
-            else:
-                for poly in self.device[layer].poly:
-                    x = [x[0] for x in list(poly.exterior.coords)]
-                    y = [x[1] for x in list(poly.exterior.coords)]
+        for layer in self.features.keys():
+            for feature in self.features[layer]:
+                if type(feature.poly) == Polygon:
+                    x = [x[0]
+                         for x in list(feature.poly.exterior.coords)]
+                    y = [x[1]
+                         for x in list(feature.poly.exterior.coords)]
                     plt.plot(x, y, color='C'+str(layer))
+                else:
+                    for poly in feature.poly:
+                        x = [x[0] for x in list(poly.exterior.coords)]
+                        y = [x[1] for x in list(poly.exterior.coords)]
+                        plt.plot(x, y, color='C'+str(layer))
 
         return fig
 
@@ -70,17 +71,18 @@ class Device:
         doc = ezdxf.new(dxfversion='R2010', setup=True)
         msp = doc.modelspace()
 
-        for layer in self.device.keys():
+        for layer in self.features.keys():
             if layer != 0:
                 doc.layers.new(name=str(layer), dxfattribs={'color': layer})
 
-            if type(self.device[layer].poly) == Polygon:
-                msp.add_lwpolyline(list(self.device[layer].poly.exterior.coords),
-                                   dxfattribs={'layer': str(layer)})
-            else:
-                for poly in self.device[layer].poly:
-                    msp.add_lwpolyline(list(poly.exterior.coords),
+            for feature in self.features[layer]:
+                if type(feature.poly) == Polygon:
+                    msp.add_lwpolyline(list(feature.poly.exterior.coords),
                                        dxfattribs={'layer': str(layer)})
+                else:
+                    for poly in feature.poly:
+                        msp.add_lwpolyline(list(poly.exterior.coords),
+                                           dxfattribs={'layer': str(layer)})
 
         doc.saveas(fname)
 
