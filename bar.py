@@ -26,7 +26,7 @@ class Bar(Device):
               (-W/2.0, -L/2.0)]
 
         body = Feature(ps)
-        self.register_feature(body, 0)
+        self.register_feature(body, 0, 0, 0, 0)
 
     def add_ohmics(self):
         L = self.bar_length
@@ -40,7 +40,7 @@ class Bar(Device):
               (-W/2.0 - pad, -L/2.0 - pad)]
 
         ohm0 = Feature(ps)
-        self.register_feature(ohm0, 1)
+        self.register_feature(ohm0, 0, 0, 0, 1)
 
         # Top ohmic
         ps = [(-W/2.0 - pad, L/2.0 + pad),
@@ -49,4 +49,4 @@ class Bar(Device):
               (-W/2.0 - pad, L/2.0 - pad)]
 
         ohm1 = Feature(ps)
-        self.register_feature(ohm1, 1)
+        self.register_feature(ohm1, 0, 0, 0, 1)

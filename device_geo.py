@@ -3,7 +3,6 @@ import numpy as np
 from shapely.geometry import Polygon
 from shapely.geometry.polygon import orient
 import shapely.affinity as affine
-import copy
 import ezdxf
 
 
@@ -15,21 +14,26 @@ class Device:
     def __init__(self):
         self.features = {}
 
-    def register_feature(self, feature, layer):
+    def register_feature(self, feature, delx, dely, theta, layer, origin='center'):
         '''
         Register a feature to the device to the given layer
+        Requires translation and rotation arguments to place the Feature in the
+        Device coordinate system
         '''
+        new_feature = feature.copy()
+        new_feature.rotate_and_translate(delx, dely, theta, origin)
+
         if layer in self.features:
-            self.features[layer].append(feature)
+            self.features[layer].append(new_feature)
         else:
-            self.features[layer] = [feature]
+            self.features[layer] = [new_feature]
 
     def heal(self):
         '''
         heals all the polygons together in a given device layer
         '''
         for layer in self.features.keys():
-            healed = copy.copy(self.features[layer][0])
+            healed = self.features[layer][0].copy()
             for i, feature in enumerate(self.features[layer]):
                 if i != 0:
                     healed.poly = healed.poly.union(feature.poly)
@@ -51,15 +55,11 @@ class Device:
         for layer in self.features.keys():
             for feature in self.features[layer]:
                 if type(feature.poly) == Polygon:
-                    x = [x[0]
-                         for x in list(feature.poly.exterior.coords)]
-                    y = [x[1]
-                         for x in list(feature.poly.exterior.coords)]
+                    x, y = feature.poly.exterior.coords.xy
                     plt.plot(x, y, color='C'+str(layer))
                 else:
                     for poly in feature.poly:
-                        x = [x[0] for x in list(poly.exterior.coords)]
-                        y = [x[1] for x in list(poly.exterior.coords)]
+                        x, y = poly.exterior.coords.xy
                         plt.plot(x, y, color='C'+str(layer))
 
         return fig
@@ -114,7 +114,7 @@ class Feature:
         '''
         self.poly = orient(self.poly, -1)
 
-    def rotate_and_offset(self, delx, dely, theta, origin='center'):
+    def rotate_and_translate(self, delx, dely, theta, origin='center'):
         '''
         Rotate and translate the polygon
         Rotate can take either center or centroid
@@ -133,8 +133,10 @@ class Feature:
         '''
         Return a figure of the feature
         '''
-        x = [x[0] for x in list(self.poly.exterior.coords)]
-        y = [x[1] for x in list(self.poly.exterior.coords)]
+        x, y = self.poly.exterior.coords.xy
         fig = plt.figure()
         plt.plot(x, y)
         return fig
+
+    def copy(self):
+        return Feature(self.poly.exterior.coords)
