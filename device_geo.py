@@ -129,6 +129,18 @@ class Feature:
         '''
         self.poly = affine.scale(self.poly, xfact, yfact, 1, origin)
 
+    def union(self, ps):
+        '''
+        Union a new polygon with the feature to form a new combined feature
+        Returns an error if the polygons are disjoint
+        '''
+        new_poly = Polygon(ps)
+        self.poly = self.poly.union(new_poly)
+        if type(self.poly) != Polygon:
+            raise ValueError('Polygons are disjoint')
+
+        self.poly2cw()
+
     def gen_fig(self):
         '''
         Return a figure of the feature
