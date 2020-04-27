@@ -135,9 +135,11 @@ class Feature:
         Returns an error if the polygons are disjoint
         '''
         new_poly = Polygon(ps)
-        self.poly = self.poly.union(new_poly)
-        if type(self.poly) != Polygon:
+        new_poly = self.poly.union(new_poly)
+        if type(new_poly) != Polygon:
             raise ValueError('Polygons are disjoint')
+        else:
+            self.poly = new_poly
 
         self.poly2cw()
 
