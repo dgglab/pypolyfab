@@ -1,4 +1,4 @@
-from device_geo import Device, Feature
+from pypolyfab.device_geo import Device, Feature
 
 
 class Bar(Device):
@@ -49,4 +49,4 @@ class Bar(Device):
               (-W/2.0 - pad, L/2.0 - pad)]
 
         ohm1 = Feature(ps)
-        self.register_feature(ohm1, 0, 0, 0, 1)
+        self.register_feature(ohm1, 0, 0, 0, 2)
