@@ -1,4 +1,4 @@
-from pypolyfab.device_geo import Device, Feature
+from device_geo import Device, Feature
 
 
 class Bar(Device):
