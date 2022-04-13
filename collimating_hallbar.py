@@ -1,4 +1,4 @@
-from device_geo import Device, Feature
+from pypolyfab.device_geo import Device, Feature
 
 
 class CHB(Device):
@@ -6,12 +6,12 @@ class CHB(Device):
     CHB creates a collimating Hall bar
     '''
 
-    def __init__(self, L, W, pad=0.1):
+    def __init__(self, L, W, pad=0.1, apt_width=0.3):
         Device.__init__(self)
         self.body_length = L
         self.body_width = W
         self.pad = pad
-        self.apt_width = 0.3
+        self.apt_width = apt_width
         self.apt_bottom = .05
         self.apt_overhang = 0.5
         self.edgeslope = 0.3
