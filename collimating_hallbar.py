@@ -6,7 +6,7 @@ class CHB(Device):
     CHB creates a collimating Hall bar
     '''
 
-    def __init__(self, L, W, pad=0.1, apt_width=0.3):
+    def __init__(self, L, W, pad=0.1, apt_width=0.3, s1_layer=1, f1_layer=2):
         Device.__init__(self)
         self.body_length = L
         self.body_width = W
@@ -22,6 +22,8 @@ class CHB(Device):
         self.inj_separation = 2.76
         self.col_length = 0.8
         self.fractional_cover = 0.2
+        self.s1_layer = s1_layer
+        self.f1_layer = f1_layer
 
         self.generate_body()
         self.add_collimators()
@@ -42,13 +44,13 @@ class CHB(Device):
 
     def add_collimators(self):
         self.generate_collimator(-self.inj_separation /
-                                 2, -self.body_width/2, 0, 1)
+                                 2, -self.body_width/2, 0, self.s1_layer, self.f1_layer)
         self.generate_collimator(
-            self.inj_separation/2, -self.body_width/2, 0, 2)
+            self.inj_separation/2, -self.body_width/2, 0, 2, 2)
         self.generate_collimator(-self.inj_separation/2,
-                                 self.body_width/2, 180, 2)
+                                 self.body_width/2, 180, 2, 2)
         self.generate_collimator(
-            self.inj_separation/2, self.body_width/2, 180, 2)
+            self.inj_separation/2, self.body_width/2, 180, 2, 2)
 
     def add_side_ohmics(self):
         W = self.body_width
@@ -74,7 +76,7 @@ class CHB(Device):
         right_ohmic = Feature(ps)
         self.register_feature(right_ohmic, 0, 0, 0, 2)
 
-    def generate_collimator(self, dx, dy, dtheta, layer):
+    def generate_collimator(self, dx, dy, dtheta, s_layer, f_layer):
         inj_height = self.inj_length + self.col_length + self.apt_bottom
         col_topcorner = self.apt_bottom + self.edgeslope / \
             2 * (self.inj_width-self.apt_width)
@@ -115,7 +117,7 @@ class CHB(Device):
               (-apt_ohmic_W/2, -apt_ohmic_bottom)]
 
         ohm1 = Feature(ps)
-        self.register_feature(ohm1, dx, dy, dtheta, 2, origin=(0, 0))
+        self.register_feature(ohm1, dx, dy, dtheta, f_layer, origin=(0, 0))
 
         # Ohmic around collimator source
         inj_ohmic_W = col_ohmic_W * 1.1
@@ -133,4 +135,4 @@ class CHB(Device):
               (inj_ohmic_W/2, -inj_ohmic_offset - inj_height)]
 
         ohm2 = Feature(ps)
-        self.register_feature(ohm2, dx, dy, dtheta, layer, origin=(0, 0))
+        self.register_feature(ohm2, dx, dy, dtheta, s_layer, origin=(0, 0))
